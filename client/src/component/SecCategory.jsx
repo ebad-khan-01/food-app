@@ -4,11 +4,14 @@ import Card from "./Card";
 
 function SecCategory() {
   const [data, setData] = useState([]);
-  const [newSlide, setNewSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const DataFromApi = async () => {
+  const fetchData = async () => {
     try {
       const response = await fetch("http://localhost:5000/top-restaurant-chains");
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
       const apiData = await response.json();
       setData(apiData);
     } catch (error) {
@@ -17,20 +20,20 @@ function SecCategory() {
   };
 
   useEffect(() => {
-    DataFromApi();
+    fetchData();
   }, []);
 
-  const visibleProduct = 4;
+  const visibleItems = 4; // Number of items visible at a time
 
   const handleRight = () => {
-    if (newSlide < data.length - visibleProduct) {
-      setNewSlide(newSlide + 3);
+    if (currentSlide < data.length - visibleItems) {
+      setCurrentSlide(currentSlide + 1);
     }
   };
 
   const handleLeft = () => {
-    if (newSlide > 0) {
-      setNewSlide(newSlide - 3);
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
     }
   };
 
@@ -60,10 +63,17 @@ function SecCategory() {
       </div>
 
       {/* Card Section */}
-      <div className="flex overflow-hidden gap-5">
-        {data.slice(newSlide, newSlide + visibleProduct).map((elem, i) => (
-          <Card width="w-full md:w-[273px]" {...elem} key={i} />
-        ))}
+      <div className="relative overflow-hidden">
+        <div
+          className="flex gap-5 transition-transform duration-300"
+          style={{
+            transform: `translateX(-${currentSlide * (100 / visibleItems)}%)`,
+          }}
+        >
+          {data.map((elem, i) => (
+            <Card key={i} width="w-full md:w-[273px]" {...elem} />
+          ))}
+        </div>
       </div>
 
       {/* Separator */}
